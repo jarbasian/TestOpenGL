@@ -21,6 +21,8 @@ public class SimpleObjLoader
         var indexList = new List<uint>();
         bool esZona = false;
         int parteZona = 0;
+        string ultimaZonaSTR = "";
+        coloresZonas zona;
         foreach (var line in File.ReadLines("../../../" + path))
         {
 
@@ -32,11 +34,10 @@ public class SimpleObjLoader
             if (parts[0] == "g")
             {
                 if (esZona){
-
-                    coloresZonas zona;
+                    ultimaZonaSTR = parts[1].Split(".")[0];
                     zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
                     zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
-                    zona.nombreZona = parts[1].Split(".")[0];
+                    zona.nombreZona = ultimaZonaSTR;
                     parteZona = vertexList.Count;
                     ZonasModelo.Add(zona); 
                 }
@@ -72,6 +73,11 @@ public class SimpleObjLoader
                 // pero aquí solo consideramos triángulos
             }
         }
+
+        zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
+        zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
+        zona.nombreZona = ultimaZonaSTR;
+        ZonasModelo.Add(zona);
 
         // Ahora pasamos a arrays planos para OpenGL
         foreach (var v in vertexList)
