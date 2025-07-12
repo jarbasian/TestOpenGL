@@ -32,7 +32,7 @@ class PyramidTruncadaWindow : GameWindow
 
     private uint[] indices;
 
-    private float scale = 0.1f;
+    private float scale = 0.01f;
 
     public List<coloresZonas> zonas = new();
 
@@ -177,7 +177,7 @@ class PyramidTruncadaWindow : GameWindow
 
         // Matrices
         Matrix4 model = Matrix4.CreateScale(scale) * Matrix4.CreateRotationY(rotation) * Matrix4.CreateRotationX(rotation * 0.5f);
-        Matrix4 view = Matrix4.CreateTranslation(0, -0.5f, -4f);
+        Matrix4 view = Matrix4.CreateTranslation((float)Math.Sin(0 + rotation), (float)Math.Sin(0 + rotation), -4f + (float)Math.Sin(0 + rotation));
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100f);
 
         int modelLoc = GL.GetUniformLocation(shaderProgram, "model");
