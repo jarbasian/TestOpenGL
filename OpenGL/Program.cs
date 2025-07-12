@@ -17,7 +17,9 @@ public struct coloresZonas
 
 class PyramidTruncadaWindow : GameWindow
 {
-
+    private double fps;
+    private double frameTimeAccumulator = 0;
+    private int frameCount = 0;
 
     private int vao;
     private int positionVBO;
@@ -32,7 +34,7 @@ class PyramidTruncadaWindow : GameWindow
 
     private uint[] indices;
 
-    private float scale = 0.01f;
+    private float scale = 0.05f;
 
     public List<coloresZonas> zonas = new();
 
@@ -45,11 +47,12 @@ class PyramidTruncadaWindow : GameWindow
         string rutaOjoPirojo =  "OjoPirojo/eyeball.obj";
         string rutaEspada = "Espada/model.obj";
         string rutaSkull = "Skull/Skull.obj";
+        string rutaPlanta = "Planta/Planta.obj";
 
 
         SimpleObjLoader loader = new SimpleObjLoader();
         //loader.Load(carpetaModelos3d + rutaOjoPirojo);
-        loader.Load(carpetaModelos3d + rutaSkull);
+        loader.Load(carpetaModelos3d + rutaPlanta);
 
 
         // Posiciones
@@ -204,6 +207,17 @@ class PyramidTruncadaWindow : GameWindow
         GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
 
         SwapBuffers();
+
+        // Contador de FPS en el Título.
+        frameCount++;
+        frameTimeAccumulator += args.Time;
+        if (frameTimeAccumulator >= 1.0)
+        {
+            fps = frameCount / frameTimeAccumulator;
+            Title = $"Pirámide truncada - FPS: {fps:F2}";
+            frameCount = 0;
+            frameTimeAccumulator = 0;
+        }
     }
 
     protected override void OnUnload()
