@@ -34,7 +34,7 @@ class PyramidTruncadaWindow : GameWindow
 
     private float scale = 0.1f;
 
-    public coloresZonas[] zonas;
+    public List<coloresZonas> zonas = new();
 
 
     protected override void OnLoad()
@@ -43,7 +43,7 @@ class PyramidTruncadaWindow : GameWindow
 
         string carpetaModelos3d = "Modelos3d/";
         string rutaOjoPirojo =  "OjoPirojo/eyeball.obj";
-        string rutaEspada = "Espada/Sting-Sword-lowpoly.obj";
+        string rutaEspada = "Espada/model.obj";
 
 
         SimpleObjLoader loader = new SimpleObjLoader();
@@ -149,12 +149,13 @@ class PyramidTruncadaWindow : GameWindow
         Random rnd = new Random();
         foreach (var zona in zonas)
         {
+            float colorZona = (float)rnd.NextDouble();
             int inicioZona = zona.inicioZona;
             int finZona = zona.finZona;
             string nomZona = zona.nombreZona;
             for (int i = inicioZona; i < finZona ; i++)
             {
-                colores[i] = (float)rnd.NextDouble();
+                colores[i] = colorZona;
             }
         }
     }

@@ -10,7 +10,7 @@ public class SimpleObjLoader
 {
     public List<float> Vertices = new();
     public List<uint> Indices = new();
-    public coloresZonas[] ZonasModelo = new coloresZonas[20]; 
+    public List<coloresZonas> ZonasModelo = new(); 
 
     public void Load(string path)
     {
@@ -20,22 +20,25 @@ public class SimpleObjLoader
         var vertexList = new List<Vector3>();
         var indexList = new List<uint>();
         bool esZona = false;
-        foreach (var line in File.ReadLines(path))
+        int parteZona = 0;
+        foreach (var line in File.ReadLines("../../../" + path))
         {
 
             
-            int parteZona = 0;
+            
             var parts = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 0)
                 continue;
             if (parts[0] == "g")
             {
                 if (esZona){
-                    esZona = false;
 
-                    ZonasModelo[ZonasModelo.Length].nombreZona = parts[1].Split(".")[0];
-                    ZonasModelo[ZonasModelo.Length].inicioZona = parteZona;
-                    ZonasModelo[ZonasModelo.Length].finZona = vertexList.Count;
+                    coloresZonas zona;
+                    zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
+                    zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
+                    zona.nombreZona = parts[1].Split(".")[0];
+                    parteZona = vertexList.Count;
+                    ZonasModelo.Add(zona); 
                 }
                 else
                 {
