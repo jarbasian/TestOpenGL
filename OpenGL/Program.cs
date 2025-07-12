@@ -47,7 +47,9 @@ class PyramidTruncadaWindow : GameWindow
 
 
         SimpleObjLoader loader = new SimpleObjLoader();
+        //loader.Load(carpetaModelos3d + rutaOjoPirojo);
         loader.Load(carpetaModelos3d + rutaEspada);
+
 
         // Posiciones
         var positions = loader.Vertices.ToArray();
@@ -149,13 +151,17 @@ class PyramidTruncadaWindow : GameWindow
         Random rnd = new Random();
         foreach (var zona in zonas)
         {
-            float colorZona = (float)rnd.NextDouble();
+            float colorZonaR = (float)rnd.NextDouble();
+            float colorZonaG = (float)rnd.NextDouble();
+            float colorZonaB = (float)rnd.NextDouble();
             int inicioZona = zona.inicioZona;
             int finZona = zona.finZona;
             string nomZona = zona.nombreZona;
-            for (int i = inicioZona; i < finZona ; i++)
+            for (int i = inicioZona; i < finZona ; i += 3)
             {
-                colores[i] = colorZona;
+                colores[i] = colorZonaR;
+                colores[i + 1] = colorZonaG;
+                colores[i + 2] = colorZonaB;
             }
         }
     }
