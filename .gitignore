@@ -1,0 +1,15 @@
+# Ignorar binarios y temporales
+bin/
+obj/
+*.exe
+*.dll
+*.log
+
+# Ignorar configuraciones de Visual Studio
+.vscode/
+*.user
+*.suo
+
+# Ignorar archivos del sistema
+.DS_Store
+Thumbs.db
