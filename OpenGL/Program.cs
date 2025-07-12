@@ -9,6 +9,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 public struct coloresZonas
 {
+    // Struct que nos permite almacenar las Partes/Zonas de cada modelos 3D, y mapearlas por Tamaño de Indice en un rango.
     public string nombreZona;
     public int inicioZona;
     public int finZona;
@@ -17,10 +18,12 @@ public struct coloresZonas
 
 class PyramidTruncadaWindow : GameWindow
 {
+    // Variables para FPS.
     private double fps;
     private double frameTimeAccumulator = 0;
     private int frameCount = 0;
 
+    // Variables para OpenTK/OpenGL
     private int vao;
     private int positionVBO;
     private int colorVBO;
@@ -29,11 +32,13 @@ class PyramidTruncadaWindow : GameWindow
     private int shaderProgram;
     private float rotation;
 
+    // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
     : base(gws, nws) { }
 
     private uint[] indices;
 
+    // Escala que usamos para los objetos mostrados (Se podria hacer por objeto en vez de que fuera general.
     private float scale = 0.05f;
 
     public List<coloresZonas> zonas = new();
@@ -43,6 +48,7 @@ class PyramidTruncadaWindow : GameWindow
     {
         base.OnLoad();
 
+        // Directorios de los archivos .obj que importamos, se hace manual, molaria un selector sencillo que te permita abrir el archivo directamente.
         string carpetaModelos3d = "Modelos3d/";
         string rutaOjoPirojo =  "OjoPirojo/eyeball.obj";
         string rutaEspada = "Espada/model.obj";
@@ -55,35 +61,28 @@ class PyramidTruncadaWindow : GameWindow
         loader.Load(carpetaModelos3d + rutaPlanta);
 
 
-        // Posiciones
+        // Vertices/Posicion de los puntos que forman los Triangulos.
         var positions = loader.Vertices.ToArray();
 
-        // Índices
+        // Índices/Caras de los triangulos.
         indices = loader.Indices.ToArray();
 
+        // Zonas/Partes de el Objeto 3d
         zonas = loader.ZonasModelo;
 
-        // Colores aleatorios
         float[] colors = new float[positions.Length];
         DameColoresZonas(ref colors, positions);
-        for (int i = 0; i < indices.Length; i += 3)
-        {
-            Vector3 v0 = new Vector3(positions[indices[i] * 3], positions[indices[i] * 3 + 1], positions[indices[i] * 3 + 2]);
-            Vector3 v1 = new Vector3(positions[indices[i + 1] * 3], positions[indices[i + 1] * 3 + 1], positions[indices[i + 1] * 3 + 2]);
-            Vector3 v2 = new Vector3(positions[indices[i + 2] * 3], positions[indices[i + 2] * 3 + 1], positions[indices[i + 2] * 3 + 2]);
 
-            var area = Vector3.Cross(v1 - v0, v2 - v0).Length;
-
-            if (area < 1e-6f) // umbral muy pequeño para área casi 0
-                Console.WriteLine($"Triángulo degenerado en índice {i / 3}");
-        }
 
 
         // Después subes buffers con positions, colors, indices igual que antes
 
 
         // Setup OpenGL
+        // Darle color al fondo.
         GL.ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+        // Tema de Z-Buffering creo, si hay algo mas cerca que un objeto lejano, el lejano no se pinta.
         GL.Enable(EnableCap.DepthTest);
 
         // Crear VAO
@@ -163,6 +162,7 @@ class PyramidTruncadaWindow : GameWindow
     }
     private void DameColoresZonas(ref float[] colores, float[] vertices)
     {
+        // Por cada zona, le damos un color a los vertices.
         Random rnd = new Random();
         foreach (var zona in zonas)
         {
@@ -184,6 +184,7 @@ class PyramidTruncadaWindow : GameWindow
     {
         base.OnRenderFrame(args);
 
+        // La rotacion se basa en el tiempo transcurrido, pero luego usamos el Seno del valor para que se mantenga estable.
         rotation += (float)args.Time;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -191,6 +192,7 @@ class PyramidTruncadaWindow : GameWindow
         GL.UseProgram(shaderProgram);
 
         // Matrices
+        // Añadimos la rotacion a la rotacion del objeto, pero tambien a la traslación, para que de vueltitas.
         Matrix4 model = Matrix4.CreateScale(scale) * Matrix4.CreateRotationY(rotation) * Matrix4.CreateRotationX(rotation * 0.5f);
         Matrix4 view = Matrix4.CreateTranslation((float)Math.Sin(0 + rotation), (float)Math.Sin(0 + rotation), -4f + (float)Math.Sin(0 + rotation));
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100f);
@@ -255,7 +257,7 @@ class PyramidTruncadaWindow : GameWindow
     {
         var nativeSettings = new NativeWindowSettings()
         {
-            Size = new Vector2i(800, 600),
+            ClientSize = new Vector2i(800, 600),
             Title = "Pirámide truncada rotando con colores y EBO",
             Flags = OpenTK.Windowing.Common.ContextFlags.ForwardCompatible
         };
