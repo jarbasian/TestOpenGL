@@ -57,21 +57,27 @@ public class SimpleObjLoader
                 vertexList.Add(new Vector3(x, y, z));
             }
             else if (parts[0] == "f") // cara
-            {
+            {   
                 if (parts.Length < 4) continue;
 
-                // OBJ usa índices 1-based, lo corregimos a 0-based
-                for (int i = 1; i <= 3; i++)
+                // Extraemos todos los índices de la cara
+                List<uint> faceIndices = new List<uint>();
+                for (int i = 1; i < parts.Length; i++)
                 {
-                    // Los vértices pueden venir como "1", "1/1/1", etc. 
                     var vertexIndexStr = parts[i].Split('/')[0];
                     uint index = uint.Parse(vertexIndexStr) - 1;
-                    indexList.Add(index);
+                    faceIndices.Add(index);
                 }
 
-                // Si la cara tiene más de 3 vértices (como un quad), se puede triangulizar,
-                // pero aquí solo consideramos triángulos
+                // Triangulación tipo fan
+                for (int i = 1; i < faceIndices.Count - 1; i++)
+                {
+                    indexList.Add(faceIndices[0]);
+                    indexList.Add(faceIndices[i]);
+                    indexList.Add(faceIndices[i + 1]);
+                }
             }
+
         }
 
         zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
