@@ -33,6 +33,7 @@ public class SimpleObjLoader
                 continue;
             if (parts[0] == "g")
             {
+                // Esta lógica es como la mayor basura que he hecho en 3 minutos para que me de el rango de las partes del modelo. Mejorable.
                 if (esZona){
                     ultimaZonaSTR = parts[1].Split(".")[0];
                     zona.inicioZona = parteZona * 3; // hay 3 vertices por linea

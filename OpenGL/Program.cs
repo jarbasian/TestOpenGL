@@ -58,7 +58,7 @@ class PyramidTruncadaWindow : GameWindow
 
         SimpleObjLoader loader = new SimpleObjLoader();
         //loader.Load(carpetaModelos3d + rutaOjoPirojo);
-        loader.Load(carpetaModelos3d + rutaPlanta);
+        loader.Load(carpetaModelos3d + rutaEspada);
 
 
         // Vertices/Posicion de los puntos que forman los Triangulos.
@@ -257,7 +257,7 @@ class PyramidTruncadaWindow : GameWindow
     {
         var nativeSettings = new NativeWindowSettings()
         {
-            ClientSize = new Vector2i(800, 600),
+            ClientSize = new Vector2i(1920, 1080),
             Title = "Pirámide truncada rotando con colores y EBO",
             Flags = OpenTK.Windowing.Common.ContextFlags.ForwardCompatible
         };
