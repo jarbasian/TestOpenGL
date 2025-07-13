@@ -25,8 +25,6 @@ public class PyramidTruncadaWindow : GameWindow
     : base(gws, nws) { }
 
 
-    // Escala que usamos para los objetos mostrados (Se podria hacer por objeto en vez de que fuera general.
-    private float scale = 0.01f;
 
     public List<coloresZonas> zonas = new();
 
@@ -124,7 +122,6 @@ public class PyramidTruncadaWindow : GameWindow
         entity.colorVbo = colorVBO;
         entity.ebo = ebo;
         entity.indexCount = entity.indices.Length;
-        entity.transform = Matrix4.Identity;
         entidades.Add(entity);
     }
 
@@ -154,7 +151,7 @@ public class PyramidTruncadaWindow : GameWindow
         {
             GL.BindVertexArray(entidad.vao);
             // Añadimos la rotacion a la rotacion del objeto
-            Matrix4 model = entidad.transform * Matrix4.CreateRotationY(rotation) * Matrix4.CreateScale(scale);
+            Matrix4 model = entidad.transform * Matrix4.CreateScale(entidad.scale) * Matrix4.CreateRotationY(rotation) * Matrix4.CreateRotationX(rotation * 0.5f) * Matrix4.CreateRotationY(rotation);
             int modelLoc = GL.GetUniformLocation(shaderProgram, "model");
             GL.UniformMatrix4(modelLoc, false, ref model);
             GL.BindVertexArray(entidad.vao);

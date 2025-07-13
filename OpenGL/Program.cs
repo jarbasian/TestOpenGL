@@ -8,9 +8,11 @@ using static System.Formats.Asn1.AsnWriter;
 
 
 
+// Escala que usamos para los objetos mostrados (Se podria hacer por objeto en vez de que fuera general.
 public class Program
 {
 
+    public static float scale = 0.01f;
 
     static void Main()
     {
@@ -18,10 +20,10 @@ public class Program
         string carpetaModelos3d = "Modelos3d/";
         List<string> rutasObj = new()
     {
-        //"OjoPirojo/eyeball.obj",
+        "OjoPirojo/eyeball.obj",
         "Espada/model.obj",
         "Skull/Skull.obj",
-        //"Planta/Planta.obj"
+        "Planta/Planta.obj"
     };
         List<Entity> entities = new();
 
@@ -36,6 +38,7 @@ public class Program
 
         SimpleObjLoader loader = new SimpleObjLoader();
         //loader.Load(carpetaModelos3d + rutaOjoPirojo);
+        var i = 1f;
         foreach (string objeto in rutasObj)
         {
             string ruta = carpetaModelos3d + objeto;
@@ -51,6 +54,12 @@ public class Program
             entidad.vertices = vertices;
             entidad.indices = indices;
             entidad.colores = colores;
+            entidad.scale = scale;
+
+            // Aqui posicionariamos dariamos escala al modelo, en este transform.
+
+            entidad.transform = Matrix4.CreateTranslation(i, 0, 0);
+            i += 30;
             window.SetEntity(entidad);
         }
 

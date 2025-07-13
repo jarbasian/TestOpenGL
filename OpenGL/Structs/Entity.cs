@@ -12,5 +12,6 @@ public struct Entity
     public int ebo;
     public int indexCount;
     public Matrix4 transform;
+    public float scale;
 
 }
