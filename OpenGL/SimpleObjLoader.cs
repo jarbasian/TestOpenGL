@@ -10,12 +10,14 @@ public class SimpleObjLoader
 {
     public List<float> Vertices = new();
     public List<uint> Indices = new();
-    public List<coloresZonas> ZonasModelo = new(); 
+    public float[] colores;
+    public List<coloresZonas> ZonasModelo = new();
 
     public void Load(string path)
     {
         Vertices.Clear();
         Indices.Clear();
+        ZonasModelo.Clear();
 
         var vertexList = new List<Vector3>();
         var indexList = new List<uint>();
@@ -95,5 +97,27 @@ public class SimpleObjLoader
         }
 
         Indices.AddRange(indexList);
+        colores = new float[Vertices.ToArray().Length];
+        DameColoresZonas(ref colores);
+    }
+    private void DameColoresZonas(ref float[] colores)
+    {
+        // Por cada zona, le damos un color a los vertices.
+        Random rnd = new Random();
+        foreach (var zona in ZonasModelo)
+        {
+            float colorZonaR = (float)rnd.NextDouble();
+            float colorZonaG = (float)rnd.NextDouble();
+            float colorZonaB = (float)rnd.NextDouble();
+            int inicioZona = zona.inicioZona;
+            int finZona = zona.finZona;
+            string nomZona = zona.nombreZona;
+            for (int i = inicioZona; i < finZona; i += 3)
+            {
+                colores[i] = colorZonaR;
+                colores[i + 1] = colorZonaG;
+                colores[i + 2] = colorZonaB;
+            }
+        }
     }
 }
