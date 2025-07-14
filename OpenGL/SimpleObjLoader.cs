@@ -19,7 +19,6 @@ public class SimpleObjLoader
         Indices.Clear();
         ZonasModelo.Clear();
 
-        var vertexList = new List<Vector3>();
         var indexList = new List<uint>();
         bool esZona = false;
         int parteZona = 0;
@@ -40,15 +39,15 @@ public class SimpleObjLoader
                         // Esto de ZonasModelo es un delimitador de colores por zonas del modelo, sin mas.
                         ultimaZonaSTR = parts[1].Split(".")[0];
                         zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
-                        zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
+                        zona.finZona = Vertices.Count; // Hay 3 vertices por linea
                         zona.nombreZona = ultimaZonaSTR;
-                        parteZona = vertexList.Count;
+                        parteZona = Vertices.Count / 3;
                         ZonasModelo.Add(zona);
                     }
                     else
                     {
                         esZona = true;
-                        parteZona = vertexList.Count;
+                        parteZona = Vertices.Count / 3;
                     }
                     break;
                 }
@@ -58,12 +57,11 @@ public class SimpleObjLoader
                     float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
                     float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
                     float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                        Vertices.Add(x);
-                        Vertices.Add(y);
-                        Vertices.Add(z);
+                    Vertices.Add(x);
+                    Vertices.Add(y);
+                    Vertices.Add(z);
 
 
-                        vertexList.Add(new Vector3(x, y, z));
                     break;
                 }
                 case "f":
@@ -82,9 +80,9 @@ public class SimpleObjLoader
                     // Triangulación tipo fan
                     for (int i = 1; i < faceIndices.Count - 1; i++)
                     {
-                        indexList.Add(faceIndices[0]);
-                        indexList.Add(faceIndices[i]);
-                        indexList.Add(faceIndices[i + 1]);
+                        Indices.Add(faceIndices[0]);
+                        Indices.Add(faceIndices[i]);
+                        Indices.Add(faceIndices[i + 1]);
                     }
                     break;
                 }
@@ -99,15 +97,6 @@ public class SimpleObjLoader
         zona.nombreZona = ultimaZonaSTR;
         ZonasModelo.Add(zona);
 
-        // Ahora pasamos a arrays planos para OpenGL
-        //foreach (var v in vertexList)
-        //{
-        //    Vertices.Add(v.X);
-        //    Vertices.Add(v.Y);
-        //    Vertices.Add(v.Z);
-        //}
-
-        Indices.AddRange(indexList);
         colores = new float[Vertices.ToArray().Length];
         DameColoresZonas(ref colores);
     }
