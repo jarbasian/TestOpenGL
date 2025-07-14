@@ -1,5 +1,4 @@
 ﻿using OpenTK.Mathematics;
-using System.Collections.Generic;
 
 public struct Entity
 {
@@ -13,5 +12,4 @@ public struct Entity
     public int indexCount;
     public Matrix4 transform;
     public float scale;
-
 }

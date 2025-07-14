@@ -1,17 +1,11 @@
-﻿using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using static System.Formats.Asn1.AsnWriter;
-
-
 
 // Escala que usamos para los objetos mostrados (Se podria hacer por objeto en vez de que fuera general.
 public class Program
 {
-
     public static float scale = 0.01f;
 
     static void Main()
@@ -37,8 +31,7 @@ public class Program
         using var window = new PyramidTruncadaWindow(GameWindowSettings.Default, nativeSettings);
 
         SimpleObjLoader loader = new SimpleObjLoader();
-        //loader.Load(carpetaModelos3d + rutaOjoPirojo);
-        var i = 1f;
+        var i = 0;
         foreach (string objeto in rutasObj)
         {
             string ruta = carpetaModelos3d + objeto;
@@ -63,19 +56,6 @@ public class Program
             window.SetEntity(entidad);
         }
 
-
         window.Run();
-
-
-
-
-
-        
-
-
-
-
-
     }
-
 }

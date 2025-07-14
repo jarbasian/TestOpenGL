@@ -27,58 +27,64 @@ public class SimpleObjLoader
         coloresZonas zona;
         foreach (var line in File.ReadLines("../../../" + path))
         {
-
-            
-            
             var parts = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 0)
                 continue;
-            if (parts[0] == "g")
+            switch (parts[0])
             {
-                // Esta lógica es como la mayor basura que he hecho en 3 minutos para que me de el rango de las partes del modelo. Mejorable.
-                if (esZona){
-                    ultimaZonaSTR = parts[1].Split(".")[0];
-                    zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
-                    zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
-                    zona.nombreZona = ultimaZonaSTR;
-                    parteZona = vertexList.Count;
-                    ZonasModelo.Add(zona); 
-                }
-                else
+                case "g":
                 {
-                    esZona = true;
-                    parteZona = vertexList.Count;
+                    // Esta lógica es como la mayor basura que he hecho en 3 minutos para que me de el rango de las partes del modelo. Mejorable.
+                    if (esZona)
+                    {
+                        // Esto de ZonasModelo es un delimitador de colores por zonas del modelo, sin mas.
+                        ultimaZonaSTR = parts[1].Split(".")[0];
+                        zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
+                        zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
+                        zona.nombreZona = ultimaZonaSTR;
+                        parteZona = vertexList.Count;
+                        ZonasModelo.Add(zona);
+                    }
+                    else
+                    {
+                        esZona = true;
+                        parteZona = vertexList.Count;
+                    }
+                    break;
                 }
-                
-            }
-            if (parts[0] == "v") // vértice
-            {
-                if (parts.Length < 4) continue;
-                float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
-                float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
-                float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                vertexList.Add(new Vector3(x, y, z));
-            }
-            else if (parts[0] == "f") // cara
-            {   
-                if (parts.Length < 4) continue;
+                case "v":
+                {
+                    if (parts.Length < 4) continue;
+                    float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
+                    float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
+                    float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
+                    vertexList.Add(new Vector3(x, y, z));
+                    break;
+                }
+                case "f":
+                {
+                    if (parts.Length < 4) continue;
 
-                // Extraemos todos los índices de la cara
-                List<uint> faceIndices = new List<uint>();
-                for (int i = 1; i < parts.Length; i++)
-                {
-                    var vertexIndexStr = parts[i].Split('/')[0];
-                    uint index = uint.Parse(vertexIndexStr) - 1;
-                    faceIndices.Add(index);
-                }
+                    // Extraemos todos los índices de la cara
+                    List<uint> faceIndices = new List<uint>();
+                    for (int i = 1; i < parts.Length; i++)
+                    {
+                        var vertexIndexStr = parts[i].Split('/')[0];
+                        uint index = uint.Parse(vertexIndexStr) - 1;
+                        faceIndices.Add(index);
+                    }
 
-                // Triangulación tipo fan
-                for (int i = 1; i < faceIndices.Count - 1; i++)
-                {
-                    indexList.Add(faceIndices[0]);
-                    indexList.Add(faceIndices[i]);
-                    indexList.Add(faceIndices[i + 1]);
+                    // Triangulación tipo fan
+                    for (int i = 1; i < faceIndices.Count - 1; i++)
+                    {
+                        indexList.Add(faceIndices[0]);
+                        indexList.Add(faceIndices[i]);
+                        indexList.Add(faceIndices[i + 1]);
+                    }
+                    break;
                 }
+                default: 
+                { break; }
             }
 
         }

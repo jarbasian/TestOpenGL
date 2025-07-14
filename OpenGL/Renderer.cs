@@ -3,12 +3,6 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using static System.Formats.Asn1.AsnWriter;
-
-
-
-
 
 public class PyramidTruncadaWindow : GameWindow
 {
@@ -24,12 +18,7 @@ public class PyramidTruncadaWindow : GameWindow
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
     : base(gws, nws) { }
 
-
-
-    public List<coloresZonas> zonas = new();
-
-    public List<Entity> entidades = new();
-
+    private List<Entity> entidades = new();
 
     protected override void OnLoad()
     {
@@ -157,8 +146,6 @@ public class PyramidTruncadaWindow : GameWindow
             GL.BindVertexArray(entidad.vao);
             GL.DrawElements(PrimitiveType.Triangles, entidad.indices.Length, DrawElementsType.UnsignedInt, 0);
         }
-
-
 
         SwapBuffers();
 
