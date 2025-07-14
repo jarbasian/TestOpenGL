@@ -21,6 +21,9 @@ public class PyramidTruncadaWindow : GameWindow
 
     private Matrix4 rotacionCamara;
 
+    // Los modelos para OpenGL, no se muy bien.
+    private int modelLoc, viewLoc, projLoc;
+
     // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
     : base(gws, nws) { }
@@ -87,6 +90,11 @@ public class PyramidTruncadaWindow : GameWindow
 
         GL.DeleteShader(vertexShader);
         GL.DeleteShader(fragmentShader);
+
+        modelLoc = GL.GetUniformLocation(shaderProgram, "model");
+        viewLoc = GL.GetUniformLocation(shaderProgram, "view");
+        projLoc = GL.GetUniformLocation(shaderProgram, "projection");
+
     }
     
     public void SetEntity(Entity entity)
@@ -134,10 +142,10 @@ public class PyramidTruncadaWindow : GameWindow
 
         rotationCamaraZ += scrollDelta.Y;
 
-        var isLeftClickPressed = MouseState.IsButtonDown(MouseButton.Left);
+        var isMiddleMouseWheelPressed = MouseState.IsButtonDown(MouseButton.Middle);
         var isRightClickPressed = MouseState.IsButtonDown(MouseButton.Right);
 
-        if (isLeftClickPressed)
+        if (isMiddleMouseWheelPressed)
         {
             Console.WriteLine(mouseDelta);
             rotationCamaraX += mouseDelta.X /50;
@@ -145,11 +153,10 @@ public class PyramidTruncadaWindow : GameWindow
         }
         if (isRightClickPressed)
         {
+            // Parece contra intuitivo pero asi es.
             rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y /50);
             rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X /50);
         }
-
-
     }
 
 
@@ -167,10 +174,7 @@ public class PyramidTruncadaWindow : GameWindow
         // Matrices
         // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
         Matrix4 view = Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -5f + rotationCamaraZ);
-        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100f);
-
-        int viewLoc = GL.GetUniformLocation(shaderProgram, "view");
-        int projLoc = GL.GetUniformLocation(shaderProgram, "projection");
+        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 100f);
 
         GL.UniformMatrix4(viewLoc, false, ref view);
         GL.UniformMatrix4(projLoc, false, ref projection);
@@ -180,9 +184,7 @@ public class PyramidTruncadaWindow : GameWindow
             GL.BindVertexArray(entidad.vao);
             // Añadimos la rotacion a la rotacion del objeto
             Matrix4 model = entidad.transform * Matrix4.CreateScale(entidad.scale) * rotacionCamara;
-            int modelLoc = GL.GetUniformLocation(shaderProgram, "model");
             GL.UniformMatrix4(modelLoc, false, ref model);
-            GL.BindVertexArray(entidad.vao);
             GL.DrawElements(PrimitiveType.Triangles, entidad.indices.Length, DrawElementsType.UnsignedInt, 0);
         }
 

@@ -30,7 +30,7 @@ public class Program
         using var window = new PyramidTruncadaWindow(GameWindowSettings.Default, nativeSettings);
 
         SimpleObjLoader loader = new SimpleObjLoader();
-        var i = 0;
+        var i = -60;
         foreach (string objeto in rutasObj)
         {
             string ruta = carpetaModelos3d + objeto;
