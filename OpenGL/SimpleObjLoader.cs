@@ -61,7 +61,6 @@ public class SimpleObjLoader
                     Vertices.Add(y);
                     Vertices.Add(z);
 
-
                     break;
                 }
                 case "f":

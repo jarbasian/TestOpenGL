@@ -1,6 +1,8 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +14,12 @@ public class PyramidTruncadaWindow : GameWindow
     private int frameCount = 0;
 
     private int shaderProgram;
-    private float rotation;
+    private float rotation = 0;
+    private float rotationCamaraX = 0;
+    private float rotationCamaraY = 0;
+    private float rotationCamaraZ = 0;
+
+    private Matrix4 rotacionCamara;
 
     // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
@@ -24,6 +31,7 @@ public class PyramidTruncadaWindow : GameWindow
     {
         base.OnLoad();
 
+        rotacionCamara = Matrix4.CreateTranslation(0, 0, 0);
         // Setup OpenGL
         // Darle color al fondo.
         GL.ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -114,12 +122,43 @@ public class PyramidTruncadaWindow : GameWindow
         entidades.Add(entity);
     }
 
+    // Aquí puedes hacer toda la lógica de entrada, física, etc.
+    protected override void OnUpdateFrame(FrameEventArgs args)
+    {
+        base.OnUpdateFrame(args);
+
+        // Delta del scroll desde el último frame
+        var scrollDelta = MouseState.ScrollDelta;
+        var mouseDelta = MouseState.Delta;
+
+
+        rotationCamaraZ += scrollDelta.Y;
+
+        var isLeftClickPressed = MouseState.IsButtonDown(MouseButton.Left);
+        var isRightClickPressed = MouseState.IsButtonDown(MouseButton.Right);
+
+        if (isLeftClickPressed)
+        {
+            Console.WriteLine(mouseDelta);
+            rotationCamaraX += mouseDelta.X /50;
+            rotationCamaraY -= mouseDelta.Y /50;
+        }
+        if (isRightClickPressed)
+        {
+            rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y /50);
+            rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X /50);
+        }
+
+
+    }
+
+
     protected override void OnRenderFrame(OpenTK.Windowing.Common.FrameEventArgs args)
     {
         base.OnRenderFrame(args);
 
         // La rotacion se basa en el tiempo transcurrido, pero luego usamos el Seno del valor para que se mantenga estable.
-        rotation += (float)args.Time;
+        rotation *= (float)args.Time;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -127,7 +166,7 @@ public class PyramidTruncadaWindow : GameWindow
 
         // Matrices
         // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
-        Matrix4 view = Matrix4.CreateTranslation((float)Math.Sin(0 + rotation), (float)Math.Sin(0 + rotation), -4f + (float)Math.Sin(0 + rotation));
+        Matrix4 view = Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -5f + rotationCamaraZ);
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100f);
 
         int viewLoc = GL.GetUniformLocation(shaderProgram, "view");
@@ -140,7 +179,7 @@ public class PyramidTruncadaWindow : GameWindow
         {
             GL.BindVertexArray(entidad.vao);
             // Añadimos la rotacion a la rotacion del objeto
-            Matrix4 model = entidad.transform * Matrix4.CreateScale(entidad.scale) * Matrix4.CreateRotationY(rotation) * Matrix4.CreateRotationX(rotation * 0.5f) * Matrix4.CreateRotationY(rotation);
+            Matrix4 model = entidad.transform * Matrix4.CreateScale(entidad.scale) * rotacionCamara;
             int modelLoc = GL.GetUniformLocation(shaderProgram, "model");
             GL.UniformMatrix4(modelLoc, false, ref model);
             GL.BindVertexArray(entidad.vao);
