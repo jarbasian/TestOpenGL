@@ -19,8 +19,6 @@ public class Program
         "Skull/Skull.obj",
         "Planta/Planta.obj"
     };
-        List<Entity> entities = new();
-
         var nativeSettings = new NativeWindowSettings()
         {
             ClientSize = new Vector2i(2560, 1440),

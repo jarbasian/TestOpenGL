@@ -58,7 +58,12 @@ public class SimpleObjLoader
                     float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
                     float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
                     float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                    vertexList.Add(new Vector3(x, y, z));
+                        Vertices.Add(x);
+                        Vertices.Add(y);
+                        Vertices.Add(z);
+
+
+                        vertexList.Add(new Vector3(x, y, z));
                     break;
                 }
                 case "f":
@@ -90,17 +95,17 @@ public class SimpleObjLoader
         }
 
         zona.inicioZona = parteZona * 3; // hay 3 vertices por linea
-        zona.finZona = vertexList.Count * 3; // Hay 3 vertices por linea
+        zona.finZona = Vertices.Count; // Hay 3 vertices por linea
         zona.nombreZona = ultimaZonaSTR;
         ZonasModelo.Add(zona);
 
         // Ahora pasamos a arrays planos para OpenGL
-        foreach (var v in vertexList)
-        {
-            Vertices.Add(v.X);
-            Vertices.Add(v.Y);
-            Vertices.Add(v.Z);
-        }
+        //foreach (var v in vertexList)
+        //{
+        //    Vertices.Add(v.X);
+        //    Vertices.Add(v.Y);
+        //    Vertices.Add(v.Z);
+        //}
 
         Indices.AddRange(indexList);
         colores = new float[Vertices.ToArray().Length];
