@@ -175,12 +175,13 @@ public class PyramidTruncadaWindow : GameWindow
         Matrix4 escala = Matrix4.Zero;
         if (entidades.Count > 0)
         {
-            centro = entidades[0].transform.ExtractTranslation();
+            // Lo hacemos negativo para compensar la camara digamos, el esta en esta posicion y nosotros nos MOVEMOS hacia esa posicion.
+            centro = -entidades[3].transform.ExtractTranslation();
         }
 
         // Matrices
         // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
-        Matrix4 view = Matrix4.CreateTranslation(-centro) * rotacionCamara * Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -5f + rotationCamaraZ);
+        Matrix4 view = Matrix4.CreateTranslation(centro) * rotacionCamara * Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -50f + rotationCamaraZ);
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 20000f);
 
         GL.UniformMatrix4(viewLoc, false, ref view);
@@ -190,7 +191,7 @@ public class PyramidTruncadaWindow : GameWindow
         {
             GL.BindVertexArray(entidad.vao);
             // Añadimos la rotacion a la rotacion del objeto
-            Matrix4 model = (entidad.transform) * Matrix4.CreateScale(entidad.scale);
+            Matrix4 model = (entidad.transform);
             GL.UniformMatrix4(modelLoc, false, ref model);
             GL.DrawElements(PrimitiveType.Triangles, entidad.indices.Length, DrawElementsType.UnsignedInt, 0);
         }
