@@ -148,8 +148,8 @@ public class PyramidTruncadaWindow : GameWindow
         if (isMiddleMouseWheelPressed)
         {
             Console.WriteLine(mouseDelta);
-            rotationCamaraX += mouseDelta.X /50;
-            rotationCamaraY -= mouseDelta.Y /50;
+            rotationCamaraX += mouseDelta.X;
+            rotationCamaraY -= mouseDelta.Y;
         }
         if (isRightClickPressed)
         {
@@ -171,19 +171,26 @@ public class PyramidTruncadaWindow : GameWindow
 
         GL.UseProgram(shaderProgram);
 
+        Vector3 centro = Vector3.Zero;
+        Matrix4 escala = Matrix4.Zero;
+        if (entidades.Count > 0)
+        {
+            centro = entidades[0].transform.ExtractTranslation();
+        }
+
         // Matrices
         // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
-        Matrix4 view = Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -5f + rotationCamaraZ);
-        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 100f);
+        Matrix4 view = Matrix4.CreateTranslation(-centro) * rotacionCamara * Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -5f + rotationCamaraZ);
+        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 20000f);
 
         GL.UniformMatrix4(viewLoc, false, ref view);
         GL.UniformMatrix4(projLoc, false, ref projection);
-        
+
         foreach (Entity entidad in entidades)
         {
             GL.BindVertexArray(entidad.vao);
             // Añadimos la rotacion a la rotacion del objeto
-            Matrix4 model = entidad.transform * Matrix4.CreateScale(entidad.scale) * rotacionCamara;
+            Matrix4 model = (entidad.transform) * Matrix4.CreateScale(entidad.scale);
             GL.UniformMatrix4(modelLoc, false, ref model);
             GL.DrawElements(PrimitiveType.Triangles, entidad.indices.Length, DrawElementsType.UnsignedInt, 0);
         }

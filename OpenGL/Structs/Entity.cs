@@ -2,6 +2,7 @@
 
 public struct Entity
 {
+    public string id;
     public float[] vertices;
     public uint[] indices;
     public float[] colores;

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 // Escala que usamos para los objetos mostrados (Se podria hacer por objeto en vez de que fuera general.
 public class Program
 {
-    public static float scale = 0.01f;
+    public static float scale = 1f;
 
     static void Main()
     {
@@ -43,6 +43,7 @@ public class Program
             // Colores.
             float[] colores = loader.colores;
             Entity entidad = new();
+            entidad.id = objeto;
             entidad.vertices = vertices;
             entidad.indices = indices;
             entidad.colores = colores;
