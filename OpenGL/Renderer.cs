@@ -24,6 +24,8 @@ public class PyramidTruncadaWindow : GameWindow
     // Los modelos para OpenGL, no se muy bien.
     private int modelLoc, viewLoc, projLoc;
 
+    private int modelSelected = 0;
+
     // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
     : base(gws, nws) { }
@@ -138,7 +140,8 @@ public class PyramidTruncadaWindow : GameWindow
         // Delta del scroll desde el último frame
         var scrollDelta = MouseState.ScrollDelta;
         var mouseDelta = MouseState.Delta;
-
+        var keyStroke = KeyboardState.ToString();
+        
 
         rotationCamaraZ += scrollDelta.Y;
 
@@ -156,6 +159,19 @@ public class PyramidTruncadaWindow : GameWindow
             // Parece contra intuitivo pero asi es.
             rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y /50);
             rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X /50);
+        }
+        
+        // Seleccion de modelo con numeros.
+        if (KeyboardState.IsAnyKeyDown)
+        {
+            for (int i = 1; i <= entidades.Count; i++)
+            {
+                if (keyStroke == @$"{{D{i}}}")
+                {
+                    modelSelected = i - 1;
+                }
+
+            }
         }
     }
 
@@ -176,7 +192,7 @@ public class PyramidTruncadaWindow : GameWindow
         if (entidades.Count > 0)
         {
             // Lo hacemos negativo para compensar la camara digamos, el esta en esta posicion y nosotros nos MOVEMOS hacia esa posicion.
-            centro = -entidades[3].transform.ExtractTranslation();
+            centro = -entidades[modelSelected].transform.ExtractTranslation();
         }
 
         // Matrices
