@@ -25,6 +25,7 @@ public class PyramidTruncadaWindow : GameWindow
     private int modelLoc, viewLoc, projLoc;
 
     private int modelSelected = 0;
+    private int sensibilidadRotacion = 50;
 
     // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
@@ -157,8 +158,8 @@ public class PyramidTruncadaWindow : GameWindow
         if (isRightClickPressed)
         {
             // Parece contra intuitivo pero asi es.
-            rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y /50);
-            rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X /50);
+            rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y / sensibilidadRotacion);
+            rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X / sensibilidadRotacion);
         }
         
         // Seleccion de modelo con numeros.
