@@ -15,8 +15,8 @@ public class PyramidTruncadaWindow : GameWindow
 
     private int shaderProgram;
     private float rotation = 0;
-    private float rotationCamaraX = 0;
-    private float rotationCamaraY = 0;
+    private float traslacionCamaraX = 0;
+    private float traslacionCamaraY = 0;
     private float rotationCamaraZ = 0;
 
     private Matrix4 rotacionCamara;
@@ -141,7 +141,7 @@ public class PyramidTruncadaWindow : GameWindow
         // Delta del scroll desde el último frame
         var scrollDelta = MouseState.ScrollDelta;
         var mouseDelta = MouseState.Delta;
-        var keyStroke = KeyboardState.ToString();
+        var keyStroke = KeyboardState.ToString().Replace("{","").Replace("}","");
         
 
         rotationCamaraZ += scrollDelta.Y;
@@ -152,8 +152,8 @@ public class PyramidTruncadaWindow : GameWindow
         if (isMiddleMouseWheelPressed)
         {
             Console.WriteLine(mouseDelta);
-            rotationCamaraX += mouseDelta.X;
-            rotationCamaraY -= mouseDelta.Y;
+            traslacionCamaraX += mouseDelta.X;
+            traslacionCamaraY -= mouseDelta.Y;
         }
         if (isRightClickPressed)
         {
@@ -165,13 +165,23 @@ public class PyramidTruncadaWindow : GameWindow
         // Seleccion de modelo con numeros.
         if (KeyboardState.IsAnyKeyDown)
         {
+            Console.WriteLine(keyStroke);
+            if(keyStroke == "Space")
+            {
+                traslacionCamaraX = 0;
+                traslacionCamaraY = 0;
+            }
+            // @@@ TODO
+            // Esto habria que cambiarlo, habria que meter un array estatico con los valores de la clase Key de cada uno e iterar por esa lista;
+            // Imaginate que tienes 2000 entidades, esto se haria por frame por entidad mientras tuvieras algo pulsado, mejor limitarlo a 10 que es el maximo de teclas numericas que puedes tener.
             for (int i = 1; i <= entidades.Count; i++)
             {
-                if (keyStroke == @$"{{D{i}}}")
+                // Por algun motivo los numericos son D1, D2, D3
+                if (keyStroke == @$"D{i}")
                 {
                     modelSelected = i - 1;
+                    break;
                 }
-
             }
         }
     }
@@ -198,7 +208,7 @@ public class PyramidTruncadaWindow : GameWindow
 
         // Matrices
         // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
-        Matrix4 view = Matrix4.CreateTranslation(centro) * rotacionCamara * Matrix4.CreateTranslation(rotationCamaraX, rotationCamaraY, -50f + rotationCamaraZ);
+        Matrix4 view = Matrix4.CreateTranslation(centro) * rotacionCamara * Matrix4.CreateTranslation(traslacionCamaraX, traslacionCamaraY, -50f + rotationCamaraZ);
         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 20000f);
 
         GL.UniformMatrix4(viewLoc, false, ref view);
