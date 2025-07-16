@@ -27,6 +27,21 @@ public class PyramidTruncadaWindow : GameWindow
     private int modelSelected = 0;
     private int sensibilidadRotacion = 50;
 
+    List<Keys> teclasNumericas = new()
+    {
+        Keys.D1,
+        Keys.D2,
+        Keys.D3,
+        Keys.D4,
+        Keys.D5,
+        Keys.D6,
+        Keys.D7,
+        Keys.D8,
+        Keys.D9
+    };
+
+    
+
     // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
     : base(gws, nws) { }
@@ -46,6 +61,7 @@ public class PyramidTruncadaWindow : GameWindow
         GL.Enable(EnableCap.DepthTest);
 
         // Compilar shaders y linkear programa
+        // TODO Enteder estas vainas :))))
         string vertexShaderSource = @"
             #version 330 core
             layout(location = 0) in vec3 aPosition;
@@ -155,6 +171,7 @@ public class PyramidTruncadaWindow : GameWindow
             traslacionCamaraX += mouseDelta.X;
             traslacionCamaraY -= mouseDelta.Y;
         }
+        // TODO MIRAR SI ESTO GIRA LOS OBJETOS QUE NO LA CAMARA
         if (isRightClickPressed)
         {
             // Parece contra intuitivo pero asi es.
@@ -165,21 +182,17 @@ public class PyramidTruncadaWindow : GameWindow
         // Seleccion de modelo con numeros.
         if (KeyboardState.IsAnyKeyDown)
         {
-            Console.WriteLine(keyStroke);
-            if(keyStroke == "Space")
+            if(KeyboardState.IsKeyDown(Keys.Space))
             {
                 traslacionCamaraX = 0;
                 traslacionCamaraY = 0;
             }
-            // @@@ TODO
-            // Esto habria que cambiarlo, habria que meter un array estatico con los valores de la clase Key de cada uno e iterar por esa lista;
-            // Imaginate que tienes 2000 entidades, esto se haria por frame por entidad mientras tuvieras algo pulsado, mejor limitarlo a 10 que es el maximo de teclas numericas que puedes tener.
-            for (int i = 1; i <= entidades.Count; i++)
+            foreach (Keys tecla in teclasNumericas) 
             {
                 // Por algun motivo los numericos son D1, D2, D3
-                if (keyStroke == @$"D{i}")
+                if (KeyboardState.IsKeyDown(tecla) && teclasNumericas.IndexOf(tecla) < entidades.Count)
                 {
-                    modelSelected = i - 1;
+                    modelSelected = teclasNumericas.IndexOf(tecla);
                     break;
                 }
             }
@@ -200,6 +213,7 @@ public class PyramidTruncadaWindow : GameWindow
 
         Vector3 centro = Vector3.Zero;
         Matrix4 escala = Matrix4.Zero;
+
         if (entidades.Count > 0)
         {
             // Lo hacemos negativo para compensar la camara digamos, el esta en esta posicion y nosotros nos MOVEMOS hacia esa posicion.
