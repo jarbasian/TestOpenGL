@@ -54,13 +54,11 @@ public class SimpleObjLoader
                 case "v":
                 {
                     if (parts.Length < 4) continue;
-                    float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
-                    float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
-                    float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                    Vertices.Add(x);
-                    Vertices.Add(y);
-                    Vertices.Add(z);
-
+                    for(int i = 1; i < 4; i++)
+                    {
+                        Vertices.Add(float.Parse(parts[i], CultureInfo.InvariantCulture));
+                    }
+                    
                     break;
                 }
                 case "f":
@@ -77,6 +75,7 @@ public class SimpleObjLoader
                     }
 
                     // Triangulación tipo fan
+                    // Aqui hace una vaina gangster.
                     for (int i = 1; i < faceIndices.Count - 1; i++)
                     {
                         Indices.Add(faceIndices[0]);
@@ -111,6 +110,7 @@ public class SimpleObjLoader
             int inicioZona = zona.inicioZona;
             int finZona = zona.finZona;
             string nomZona = zona.nombreZona;
+            // Vuelve a hacer una vaina gangster.
             for (int i = inicioZona; i < finZona; i += 3)
             {
                 colores[i] = colorZonaR;
