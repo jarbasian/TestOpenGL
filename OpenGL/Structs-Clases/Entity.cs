@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-public struct Entity
+public class Entity
 {
     public string id;
     public float[] vertices;
@@ -13,4 +13,10 @@ public struct Entity
     public int indexCount;
     public Matrix4 transform;
     public float scale;
+    public float rotation;
+
+    public void SetPosition(Matrix4 traslacion)
+    {
+        transform = transform * traslacion;
+    }
 }
