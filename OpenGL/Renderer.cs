@@ -8,60 +8,42 @@ using System.Collections.Generic;
 
 public class PyramidTruncadaWindow : GameWindow
 {
-    // Variables para FPS.
     private double fps;
     private double frameTimeAccumulator = 0;
     private int frameCount = 0;
 
     private int shaderProgram;
-    private float rotation = 0;
-    private float traslacionCamaraX = 0;
-    private float traslacionCamaraY = 0;
-    private float rotationCamaraZ = 0;
-
-    private Matrix4 rotacionCamara;
-
-    // Los modelos para OpenGL, no se muy bien.
     private int modelLoc, viewLoc, projLoc;
 
+    private Camera camera;
+    private float cameraSpeed = 60f;     // velocidad WASD
+    private float mouseSensitivity = 0.2f;
+
+    private bool firstMouseMove = true;
+    private Vector2 lastMousePos;
+
+    private List<Entity> entidades = new();
     private int modelSelected = 0;
-    private int sensibilidadRotacion = 50;
 
     List<Keys> teclasNumericas = new()
     {
-        Keys.D1,
-        Keys.D2,
-        Keys.D3,
-        Keys.D4,
-        Keys.D5,
-        Keys.D6,
-        Keys.D7,
-        Keys.D8,
-        Keys.D9
+        Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5,
+        Keys.D6, Keys.D7, Keys.D8, Keys.D9
     };
 
-    
-
-    // Constructor que debemos montar para la Clase.
     public PyramidTruncadaWindow(GameWindowSettings gws, NativeWindowSettings nws)
-    : base(gws, nws) { }
-
-    private List<Entity> entidades = new();
+        : base(gws, nws) { }
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
-        rotacionCamara = Matrix4.CreateTranslation(0, 0, 0);
-        // Setup OpenGL
-        // Darle color al fondo.
         GL.ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
-        // Tema de Z-Buffering creo, si hay algo mas cerca que un objeto lejano, el lejano no se pinta.
         GL.Enable(EnableCap.DepthTest);
 
-        // Compilar shaders y linkear programa
-        // TODO Enteder estas vainas :))))
+        camera = new Camera();
+
+        // === SHADERS ===
         string vertexShaderSource = @"
             #version 330 core
             layout(location = 0) in vec3 aPosition;
@@ -113,30 +95,25 @@ public class PyramidTruncadaWindow : GameWindow
         modelLoc = GL.GetUniformLocation(shaderProgram, "model");
         viewLoc = GL.GetUniformLocation(shaderProgram, "view");
         projLoc = GL.GetUniformLocation(shaderProgram, "projection");
-
     }
-    
+
     public void SetEntity(Entity entity)
     {
-        // Crear VAO
         int vao = GL.GenVertexArray();
         GL.BindVertexArray(vao);
 
-        // Crear VBO posiciones
         int positionVBO = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, positionVBO);
         GL.BufferData(BufferTarget.ArrayBuffer, entity.vertices.Length * sizeof(float), entity.vertices, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexAttribArray(0);
 
-        // Crear VBO colores
         int colorVBO = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, colorVBO);
         GL.BufferData(BufferTarget.ArrayBuffer, entity.colores.Length * sizeof(float), entity.colores, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexAttribArray(1);
 
-        // Crear EBO índices
         int ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
         GL.BufferData(BufferTarget.ElementArrayBuffer, entity.indices.Length * sizeof(uint), entity.indices, BufferUsageHint.StaticDraw);
@@ -149,97 +126,74 @@ public class PyramidTruncadaWindow : GameWindow
         entidades.Add(entity);
     }
 
-    // Aquí puedes hacer toda la lógica de entrada, física, etc.
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
 
-        // Delta del scroll desde el último frame
-        var scrollDelta = MouseState.ScrollDelta;
-        var mouseDelta = MouseState.Delta;
-        var keyStroke = KeyboardState.ToString().Replace("{","").Replace("}","");
-        
+        var keyboard = KeyboardState;
+        var mouse = MouseState;
 
-        rotationCamaraZ += scrollDelta.Y;
+        float speed = cameraSpeed * (float)args.Time;
 
-        var isMiddleMouseWheelPressed = MouseState.IsButtonDown(MouseButton.Middle);
-        var isRightClickPressed = MouseState.IsButtonDown(MouseButton.Right);
+        // === Movimiento WASD ===
+        if (keyboard.IsKeyDown(Keys.W))
+            camera.Position += camera.Front * speed;
+        if (keyboard.IsKeyDown(Keys.S))
+            camera.Position -= camera.Front * speed;
+        if (keyboard.IsKeyDown(Keys.A))
+            camera.Position -= Vector3.Normalize(Vector3.Cross(camera.Front, camera.Up)) * speed;
+        if (keyboard.IsKeyDown(Keys.D))
+            camera.Position += Vector3.Normalize(Vector3.Cross(camera.Front, camera.Up)) * speed;
+        if (keyboard.IsKeyDown(Keys.Space))
+            camera.Position += camera.Up * speed;
+        if (keyboard.IsKeyDown(Keys.LeftShift))
+            camera.Position -= camera.Up * speed;
 
-        if (isMiddleMouseWheelPressed)
+        // === Rotación de cámara con clic derecho ===
+        if (mouse.IsButtonDown(MouseButton.Right))
         {
-            Console.WriteLine(mouseDelta);
-            traslacionCamaraX += mouseDelta.X;
-            traslacionCamaraY -= mouseDelta.Y;
-        }
-        // TODO MIRAR SI ESTO GIRA LOS OBJETOS QUE NO LA CAMARA
-        if (isRightClickPressed)
-        {
-            // Parece contra intuitivo pero asi es.
-            rotacionCamara *= Matrix4.CreateRotationX(mouseDelta.Y / sensibilidadRotacion);
-            rotacionCamara *= Matrix4.CreateRotationY(mouseDelta.X / sensibilidadRotacion);
-        }
-        
-        // Seleccion de modelo con numeros.
-        if (KeyboardState.IsAnyKeyDown)
-        {
-            if(KeyboardState.IsKeyDown(Keys.Space))
+            if (firstMouseMove)
             {
-                traslacionCamaraX = 0;
-                traslacionCamaraY = 0;
+                lastMousePos = mouse.Position;
+                firstMouseMove = false;
             }
-            foreach (Keys tecla in teclasNumericas) 
-            {
-                // Por algun motivo los numericos son D1, D2, D3
-                if (KeyboardState.IsKeyDown(tecla) && teclasNumericas.IndexOf(tecla) < entidades.Count)
-                {
-                    modelSelected = teclasNumericas.IndexOf(tecla);
-                    break;
-                }
-            }
+
+            Vector2 delta = mouse.Position - lastMousePos;
+            lastMousePos = mouse.Position;
+
+            camera.Yaw += delta.X * mouseSensitivity;
+            camera.Pitch -= delta.Y * mouseSensitivity;
+        }
+        else
+        {
+            firstMouseMove = true;
         }
     }
 
-
-    protected override void OnRenderFrame(OpenTK.Windowing.Common.FrameEventArgs args)
+    protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
-
-        // La rotacion se basa en el tiempo transcurrido, pero luego usamos el Seno del valor para que se mantenga estable.
-        rotation *= (float)args.Time;
-
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         GL.UseProgram(shaderProgram);
 
-        Vector3 centro = Vector3.Zero;
-        Matrix4 escala = Matrix4.Zero;
-
-        if (entidades.Count > 0)
-        {
-            // Lo hacemos negativo para compensar la camara digamos, el esta en esta posicion y nosotros nos MOVEMOS hacia esa posicion.
-            centro = -entidades[modelSelected].transform.ExtractTranslation();
-        }
-
-        // Matrices
-        // Añadimos la rotacion a la vista (camara), para que de vueltitas alrededor de los objetos.
-        Matrix4 view = Matrix4.CreateTranslation(centro) * rotacionCamara * Matrix4.CreateTranslation(traslacionCamaraX, traslacionCamaraY, -50f + rotationCamaraZ);
-        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65f), Size.X / (float)Size.Y, 0.3f, 20000f);
+        Matrix4 view = camera.GetViewMatrix();
+        Matrix4 projection = camera.GetProjectionMatrix(Size.X / (float)Size.Y);
 
         GL.UniformMatrix4(viewLoc, false, ref view);
         GL.UniformMatrix4(projLoc, false, ref projection);
 
-        foreach (Entity entidad in entidades)
+        foreach (var entidad in entidades)
         {
             GL.BindVertexArray(entidad.vao);
-            // Añadimos la rotacion a la rotacion del objeto
-            Matrix4 model = (entidad.transform);
+            Matrix4 model = entidad.transform;
             GL.UniformMatrix4(modelLoc, false, ref model);
             GL.DrawElements(PrimitiveType.Triangles, entidad.indices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
         SwapBuffers();
 
-        // Contador de FPS en el Título.
+        // FPS
         frameCount++;
         frameTimeAccumulator += args.Time;
         if (frameTimeAccumulator >= 1.0)
@@ -254,15 +208,13 @@ public class PyramidTruncadaWindow : GameWindow
     protected override void OnUnload()
     {
         base.OnUnload();
-
-        foreach (Entity entidad in entidades)
+        foreach (var e in entidades)
         {
-            GL.DeleteBuffer(entidad.positionVbo);
-            GL.DeleteBuffer(entidad.colorVbo);
-            GL.DeleteBuffer(entidad.ebo);
-            GL.DeleteVertexArray(entidad.vao);
+            GL.DeleteBuffer(e.positionVbo);
+            GL.DeleteBuffer(e.colorVbo);
+            GL.DeleteBuffer(e.ebo);
+            GL.DeleteVertexArray(e.vao);
         }
-
         GL.DeleteProgram(shaderProgram);
     }
 
@@ -271,8 +223,7 @@ public class PyramidTruncadaWindow : GameWindow
         GL.GetShader(shader, ShaderParameter.CompileStatus, out int status);
         if (status == 0)
         {
-            string info = GL.GetShaderInfoLog(shader);
-            throw new Exception("Shader compilation failed: " + info);
+            throw new Exception("Shader compile error: " + GL.GetShaderInfoLog(shader));
         }
     }
 
@@ -281,8 +232,7 @@ public class PyramidTruncadaWindow : GameWindow
         GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int status);
         if (status == 0)
         {
-            string info = GL.GetProgramInfoLog(program);
-            throw new Exception("Program linking failed: " + info);
+            throw new Exception("Program link error: " + GL.GetProgramInfoLog(program));
         }
     }
 }
